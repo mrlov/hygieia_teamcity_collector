@@ -10,6 +10,7 @@ import pyteamcity
 import http.server
 
 config={}
+tc=""
 
 class TCWebHookHandler(http.server.BaseHTTPRequestHandler):
   def do_POST(s):
@@ -33,13 +34,23 @@ formatter = logging.Formatter('%(asctime)s | %(name)s | %(levelname)s | %(messag
 ch.setFormatter(formatter)
 logger.addHandler(ch)
 
+def getTeamcityConnection(user,password,host):
+  tc = pyteamcity.TeamCity(user,password,host)
+  try:
+    tc.get_server_info()
+  except Exception as e:
+    logger.error("can not connected to TeamCity: %s" % e)
+    result = False
+  else:
+    result = tc
+  return result
+
 def dateTimeToTimestamp(s):
   s=datetime.datetime.strptime(s, "%Y%m%dT%H%M%S%z").timestamp()*1000
   s="%.0f" % s
   return s
 
 def processBuild(buildId):
-  tc = pyteamcity.TeamCity(config['TEAMCITY_USER'], config['TEAMCITY_PASSWORD'], config['TEAMCITY_HOST'])
   try:
     build = tc.get_build_by_build_id(buildId)
   except Exception as e:
@@ -70,7 +81,13 @@ def processBuild(buildId):
   data['endTime']=dateTimeToTimestamp(build['finishDate'])
   # FIXME: what is instanceUrl ? set to N/A
   data['instanceUrl']="N/A"
-  data['jobName']=build['buildType']['projectName']
+
+  try:
+    data['jobName']=build['buildType']['projectName']
+  except Exception as e:
+    logger.warn("can not get project name from build type, set to N/A")
+    data['jobName']="N/A"
+
   # FIXME: what is jobURL? set to webUrl
   data['jobUrl']=build['webUrl']
   try:
@@ -99,7 +116,7 @@ def processBuild(buildId):
         try:
           sourceChangeSet['scmAuthor']=change['user']['name']
         except Exception as e:
-          logger.info("user.name is not found for change %s" % changeIterator['id'])
+          logger.info("user.name is not found for change %s, set to username" % changeIterator['id'])
         else:
           sourceChangeSet['scmAuthor']=change['username']
 
@@ -112,6 +129,7 @@ def processBuild(buildId):
   headers = {'Accept': 'application/json','Content-type':'application/json'}
   url=config['HYGIEIA_API_URL'] + "/build"
   request=requests.post(url, data=dataJson, headers=headers)
+  logger.info("new build ID: %s" % build['id'])
   result={}
   result['status_code']=request.status_code
   result['text']=request.text
@@ -127,10 +145,12 @@ def checkEnvironmentVariables(config):
 
 if __name__ == '__main__':
   checkEnvironmentVariables(config)
-  httpd = http.server.HTTPServer((config['HOST'], config['PORT']), TCWebHookHandler)
-  try:
-      httpd.serve_forever()
-  except KeyboardInterrupt:
-      pass
-  httpd.server_close()
+  tc = getTeamcityConnection(config['TEAMCITY_USER'], config['TEAMCITY_PASSWORD'], config['TEAMCITY_HOST'])
+  if tc != False:
+    httpd = http.server.HTTPServer((config['HOST'], config['PORT']), TCWebHookHandler)
+    try:
+        httpd.serve_forever()
+    except KeyboardInterrupt:
+        pass
+    httpd.server_close()
 
