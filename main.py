@@ -157,10 +157,13 @@ def checkEnvironmentVariables(config):
     config['TEAMCITY_USER'] = os.getenv("TEAMCITY_USER")
   else:
     logger.info("TEAMCITY_USER environment variable is not set, trying with empty")
+    config['TEAMCITY_USER'] = ""
+
   if "TEAMCITY_PASSWORD" in os.environ:
     config['TEAMCITY_PASSWORD'] = os.getenv("TEAMCITY_PASSWORD")
   else:
     logger.info("TEAMCITY_PASSWORD environment variable is not set, trying with empty")
+    config['TEAMCITY_PASSWORD'] = ""
   return result
 
 if __name__ == '__main__':
