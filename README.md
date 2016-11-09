@@ -1,4 +1,5 @@
 # hygieia teamcity collector
+v.1.1
 
 Provides connection between Hygiea API and teamcity
 
@@ -14,26 +15,28 @@ Provides connection between Hygiea API and teamcity
     - Trigger when build is Succesfull
     - Trigger when build Fails
 
+![Teamcity Webhook configuration](img/tc_webhook.png)
+
 # environment variables:
 
-- `HYGIEIA_API_URL`: ex. http://<host>:<port>/api
-- `TEAMCITY_HOST`: ex. <IP address> or <teamcity.corp> etc...
+- `HYGIEIA_API_URL`: ex. http://host:port/api
+- `TEAMCITY_HOST`: ex. "192.168.100.101" or "teamcity.corp" etc...
 - `TEAMCITY_USER`: ex. "admin"
 - `TEAMCITY_PASSWORD`: ex. "securepassword"
 
-# standalone container run command:
-``
+# run as standalone container:
+```
 docker run \
   -e "TEAMCITY_HOST=192.168.100.101" \
   -e "TEAMCITY_USER=administrator" \
   -e "TEAMCITY_PASSWORD=securepassword" \
-  -e "HYGIEIA_API_URL=http://hygieia-01.dub:8080/api" \
+  -e "HYGIEIA_API_URL=http://hygieia-api:8080/api" \
   -p 8080:80 \
   --name "hygieia-teamcity-collector" \
   alexeyanikanov/hygieia_teamcity_collector:latest
-``
+```
 # docker-compose example:
-``
+```
 hygieia-teamcity-collector:
   image: alexeyanikanov/hygieia_teamcity_collector:latest
   container_name: hygieia-teamcity
@@ -46,5 +49,4 @@ hygieia-teamcity-collector:
     - TEAMCITY_USER=administrator
     - TEAMCITY_PASSWORD=securepassword
     - HYGIEIA_API_URL=http://hygieia-api:8080/api
-``
-
+```
