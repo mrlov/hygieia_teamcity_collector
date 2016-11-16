@@ -122,7 +122,7 @@ def processBuild(buildId):
           logger.info("user.name is not found for change %s, set to username" % changeIterator['id'])
         else:
           sourceChangeSet['scmAuthor'] = change['username']
-        if sourceChangeSet['scmAuthor'] == '' && build['triggered']['type'] == "vcs":
+        if sourceChangeSet['scmAuthor'] == '' and build['triggered']['type'] == "vcs":
           sourceChangeSet['scmAuthor'] = "started by VCS trigger"
         else:
           logger.error("can not get \"triggered by\" value for buildId %s" % buildId)
