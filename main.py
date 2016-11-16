@@ -77,7 +77,7 @@ def processBuild(buildId):
   data['buildUrl'] = build['webUrl']
   buildStatisticProperties = buildStatistic['property']
   for buildStatisticProperty in  buildStatisticProperties:
-    if 'BuildDuration' == buildStatisticProperty['name']:
+    if 'BuildDurationNetTime' == buildStatisticProperty['name']:
       data['duration'] = int(buildStatisticProperty['value'])
   data['startTime'] = dateTimeToTimestamp(build['startDate'])
   data['endTime'] = dateTimeToTimestamp(build['finishDate'])
@@ -118,10 +118,14 @@ def processBuild(buildId):
         try:
           sourceChangeSet['scmAuthor'] = change['user']['name']
         except Exception as e:
+          sourceChangeSet['scmAuthor'] = ''
           logger.info("user.name is not found for change %s, set to username" % changeIterator['id'])
         else:
           sourceChangeSet['scmAuthor'] = change['username']
-
+        if sourceChangeSet['scmAuthor'] == '' && build['triggered']['type'] == "vcs":
+          sourceChangeSet['scmAuthor'] = "started by VCS trigger"
+        else:
+          logger.error("can not get \"triggered by\" value for buildId %s" % buildId)
         sourceChangeSet['scmCommitTimestamp'] = dateTimeToTimestamp(change['date'])
         sourceChangeSet['numberOfChanges'] = 1
         data['sourceChangeSet'].append(sourceChangeSet)
