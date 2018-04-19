@@ -8,6 +8,7 @@ import requests
 import datetime
 import pyteamcity
 import http.server
+import validators
 
 from urllib.parse import urlparse
 
@@ -149,13 +150,13 @@ def checkEnvironmentVariables(config):
   result = True
   config["HOST"] = "0.0.0.0"
   config['PORT'] = 80
-  if "HYGIEIA_API_URL" in os.environ:
+  if "HYGIEIA_API_URL" in os.environ and validators.url(os.getenv("HYGIEIA_API_URL")):
     config['HYGIEIA_API_URL'] = os.getenv("HYGIEIA_API_URL")
   else:
     logger.error("HYGIEIA_API_URL environmanet variable is not set")
     result = False
 
-  if "TEAMCITY_URL" in os.environ:
+  if "TEAMCITY_URL" in os.environ and validators.url(os.getenv("TEAMCITY_URL")):
     config['TEAMCITY_URL'] = os.getenv("TEAMCITY_URL")
   else:
     logger.error("TEAMCITY_URL environmanet variable is not set")
