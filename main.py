@@ -131,6 +131,8 @@ def processBuild(buildId):
           sourceChangeSet['scmAuthor'] = change['username']
         if sourceChangeSet['scmAuthor'] == '' and build['triggered']['type'] == "vcs":
           sourceChangeSet['scmAuthor'] = "started by VCS trigger"
+        elif sourceChangeSet['scmAuthor'] == '' and build['triggered']['type'] == "user":
+          sourceChangeSet['scmAuthor'] = build['triggered']['user']['username']
         else:
           logger.error("can not get \"triggered by\" value for buildId %s" % buildId)
         sourceChangeSet['scmCommitTimestamp'] = dateTimeToTimestamp(change['date'])
