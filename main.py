@@ -18,9 +18,9 @@ logger = None
 
 def initializeLogger():
   logger = logging.getLogger('teamcity_connector')
-  logger.setLevel(logging.DEBUG)
+  logger.setLevel(logging.INFO)
   ch = logging.StreamHandler()
-  ch.setLevel(logging.DEBUG)
+  ch.setLevel(logging.INFO)
   formatter = logging.Formatter('%(asctime)s | %(name)s | %(levelname)s | %(message)s')
   ch.setFormatter(formatter)
   logger.addHandler(ch)
@@ -59,6 +59,8 @@ def dateTimeToTimestamp(s):
 def processBuild(buildId):
   try:
     build = tc.get_build_by_build_id(buildId)
+    logger.debug("buildId: %s" % buildId)
+    logger.debug("build: %s" % build)
   except Exception as e:
     logger.error("can not get build: %s" % e)
   
@@ -137,13 +139,17 @@ def processBuild(buildId):
   
   dataJson=json.dumps(data)
   
+  logger.debug("dataJson: %s" % dataJson)
+
   headers = {'Accept': 'application/json','Content-type':'application/json'}
   url=config['HYGIEIA_API_URL'] + "/build"
   request=requests.post(url, data = dataJson, headers = headers)
-  logger.info("new build ID: %s" % build['id'])
+  logger.debug("request: %s" % request)
+  logger.debug("build ID: %s" % build['id'])
   result={}
   result['status_code']=request.status_code
   result['text']=request.text
+  logger.debug("result: %s" % result)
   return result
 
 def checkEnvironmentVariables(config):
