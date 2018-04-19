@@ -9,6 +9,8 @@ import datetime
 import pyteamcity
 import http.server
 
+from urllib.parse import urlparse
+
 config = {}
 tc = None
 logger = None
@@ -36,8 +38,9 @@ class TCWebHookHandler(http.server.BaseHTTPRequestHandler):
     s.wfile.write(result['text'].encode("utf-8"))
     return
 
-def getTeamcityConnection(user,password,host):
-  tc = pyteamcity.TeamCity(user,password,host)
+def getTeamcityConnection(user,password,url):
+  url_parsed = urlparse(url)
+  tc = pyteamcity.TeamCity(user,password,url_parsed.hostname,url_parsed.port)
   try:
     tc.get_server_info()
   except Exception as e:
@@ -151,10 +154,10 @@ def checkEnvironmentVariables(config):
     logger.error("HYGIEIA_API_URL environmanet variable is not set")
     result = False
 
-  if "TEAMCITY_HOST" in os.environ:
-    config['TEAMCITY_HOST'] = os.getenv("TEAMCITY_HOST")
+  if "TEAMCITY_URL" in os.environ:
+    config['TEAMCITY_URL'] = os.getenv("TEAMCITY_URL")
   else:
-    logger.error("TEAMCITY_HOST environmanet variable is not set")
+    logger.error("TEAMCITY_URL environmanet variable is not set")
     result=False
 
   if "TEAMCITY_USER" in os.environ:
@@ -173,7 +176,7 @@ def checkEnvironmentVariables(config):
 if __name__ == '__main__':
   logger = initializeLogger()
   if checkEnvironmentVariables(config) == True:
-    tc = getTeamcityConnection(config['TEAMCITY_USER'], config['TEAMCITY_PASSWORD'], config['TEAMCITY_HOST'])
+    tc = getTeamcityConnection(config['TEAMCITY_USER'], config['TEAMCITY_PASSWORD'], config['TEAMCITY_URL'])
     if tc != False:
       httpd = http.server.HTTPServer((config['HOST'], config['PORT']), TCWebHookHandler)
       try:
