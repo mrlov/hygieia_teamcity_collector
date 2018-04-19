@@ -83,7 +83,8 @@ def processBuild(buildId):
     if 'BuildDurationNetTime' == buildStatisticProperty['name']:
       data['duration'] = int(buildStatisticProperty['value'])
   data['startTime'] = dateTimeToTimestamp(build['startDate'])
-  data['endTime'] = dateTimeToTimestamp(build['finishDate'])
+  if 'finishDate' in build:
+    data['endTime'] = dateTimeToTimestamp(build['finishDate'])
   # FIXME: what is instanceUrl ? set to N/A
   data['instanceUrl']  = "N/A"
 
