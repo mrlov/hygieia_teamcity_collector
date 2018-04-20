@@ -27,16 +27,16 @@ def initializeLogger():
   return logger
 
 class TCWebHookHandler(http.server.BaseHTTPRequestHandler):
-  def do_POST(s):
-    contentLen = int(s.headers['Content-Length'])
-    postBody=s.rfile.read(contentLen)
+  def do_POST(self):
+    contentLen = int(self.headers['Content-Length'])
+    postBody=self.rfile.read(contentLen)
     postBody = postBody.decode("utf-8")
     postBody=json.loads(postBody)
     buildId=postBody['build']['buildId']
     result=processBuild(buildId)
-    s.send_response(result['status_code'])
-    s.end_headers()
-    s.wfile.write(result['text'].encode("utf-8"))
+    self.send_response(result['status_code'])
+    self.end_headers()
+    self.wfile.write(result['text'].encode("utf-8"))
     return
 
 def getTeamcityConnection(user,password,url):
